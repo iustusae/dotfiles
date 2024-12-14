@@ -7,41 +7,46 @@
 ### Variables
 #
 # Logo key. Use Mod1 for Alt.
-set $mod Mod4
+
+
+set $mod Mod1
 # Home row direction keys, like vim
 set $left h
 set $down j
 set $up k
 set $right l
 # Your preferred terminal emulator
-set $term alacritty 
+set $term alacritty
 # Your preferred application launcher
-# Note: pass the final command to swaymsg so that the resulting window can be opened
-# on the original workspace that the command was run on.
-#set $menu dmenu_path | wmenu | xargs swaymsg exec --
+set $menu rofi -show drun
 
 ### Output configuration
 #
 # Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
-exec ~/.azotebg
+set $wpp ~/walls/
+output * bg `find $wpp -type f | shuf -n 1` fill
 #
 # Example configuration:
 #
-
-output HDMI-A-1 pos 0 0 res 1920x1080
-output DP-3 pos 1920 0 res 1920x1080 
+#   output HDMI-A-1 resolution 1920x1080 position 1920,0
 #
+
+
+   # output DP-3 resolution 1920x1080 position 3840 0 transform 270
+   output DP-3 resolution 1920x1080 position 3840 0
+   output HDMI-A-1 resolution 1920x1080 position 1920 0
+
 # You can get the names of your outputs by running: swaymsg -t get_outputs
 
 ### Idle configuration
 #
 # Example configuration:
 #
-# exec swayidle -w \
-#          timeout 120 'swaylock -f -c 000000' \
-#          timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
-#          before-sleep 'swaylock -f -c 000000'
-
+ exec swayidle -w \
+          timeout 300 'swaylock -f -c 000000' \
+          timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
+          before-sleep 'swaylock -f -c 000000'
+#
 # This will lock your screen after 300 seconds of inactivity, then turn off
 # your displays after another 300 seconds, and turn your screens back on when
 # resumed. It will also lock your screen before your computer goes to sleep.
@@ -59,8 +64,7 @@ output DP-3 pos 1920 0 res 1920x1080
 #
 # You can get the names of your inputs by running: swaymsg -t get_inputs
 # Read `man 5 sway-input` for more information about this section.
-set $dir "$HOME/.config/rofi/launchers/type-1"
-set $theme "style-5"
+
 ### Key bindings
 #
 # Basics:
@@ -72,14 +76,19 @@ set $theme "style-5"
     bindsym $mod+Shift+q kill
 
     # Start your launcher
-    bindsym $mod+d exec rofi -show combi -combi-modes "run,ssh" -modes combi -theme $dir/$theme.rasi
-    bindsym $mod+Shift+w exec rofi -show window -theme $dir/$theme.rasi
-    # Drag floating windows by holding down $mod and left mouse button.
+    bindsym $mod+d exec $menu
+    bindsym $mod+Shift+d exec rofi -show window
+    bindsym $mod+Shift+r exec rofi -show run
+    bindsym $mod+Shift+f exec rofi -show filebrowser
+
+
+    # Drag floating wind<D-W>ows by holding down $mod and left mouse button.
     # Resize them with right mouse button + $mod.
     # Despite the name, also works for non-floating windows.
     # Change normal to inverse to use left mouse button for resizing and right
     # mouse button for dragging.
-    floating_modifier $mod normal
+    # floating_modifier $mod normal
+    
 
     # Reload the configuration file
     bindsym $mod+Shift+c reload
@@ -198,29 +207,44 @@ mode "resize" {
     bindsym Escape mode "default"
 }
 bindsym $mod+r mode "resize"
+#
+# Utilities:
+#
+    # Special keys to adjust volume via PulseAudio
+    # bindsym --locked XF86AudioMute exec pactl set-sink-mute \@DEFAULT_SINK@ toggle
+    # bindsym --locked XF86AudioLowerVolume exec pactl set-sink-volume \@DEFAULT_SINK@ -5%
+    # bindsym --locked XF86AudioRaiseVolume exec pactl set-sink-volume \@DEFAULT_SINK@ +5%
+    bindsym --locked XF86AudioMicMute exec pactl set-source-mute \@DEFAULT_SOURCE@ toggle
+    # Special keys to adjust brightness via brightnessctl
+    bindsym --locked XF86MonBrightnessDown exec brightnessctl set 5%-
+    bindsym --locked XF86MonBrightnessUp exec brightnessctl set 5%+
+    # Special key to take a screenshot with grim
+    bindsym Print exec grim
 
 #
 # Status Bar:
 #
 # Read `man 5 sway-bar` for more information about this section.
-bar {
-    position top
-    swaybar_command waybar
+bindsym XF86AudioRaiseVolume exec "pw-volume change +2.5%; pkill -RTMIN+8 waybar"
+bindsym XF86AudioLowerVolume exec "pw-volume change -2.5%; pkill -RTMIN+8 waybar"
+bindsym XF86AudioMute exec "pw-volume mute toggle; pkill -RTMIN+8 waybar"
 
-    # # When the status_command prints a new line to stdout, swaybar updates.
-    # # The default just shows the current date and time.
-    # status_command while date +'%Y-%m-%d %X'; do sleep 1; done
-    #
-    # colors {
-    #     statusline #ffffff
-    #     background #323232
-    #     inactive_workspace #32323200 #32323200 #5c5c5c
-    # }
+include ./catppuccin-mocha
+
+# target                 title     bg    text   indicator  border
+client.focused           $lavender $base $text  $rosewater $lavender
+client.focused_inactive  $overlay0 $base $text  $rosewater $overlay0
+client.unfocused         $overlay0 $base $text  $rosewater $overlay0
+client.urgent            $peach    $base $peach $overlay0  $peach
+client.placeholder       $overlay0 $base $text  $overlay0  $overlay0
+client.background        $base
+
+
+
+bar {
+     swaybar_command waybar
 }
 
-bindsym $mod+Shift+s exec flameshot gui
-
-gaps inner 5
-exec_always primary.sh
-
+exec_always --no-startup-id mako
+bindsym $mod+p exec grim -g "$(slurp -d)" - | wl-copy
 include /etc/sway/config.d/*

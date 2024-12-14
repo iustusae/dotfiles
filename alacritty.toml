@@ -1,9 +1,9 @@
 
 [font]
-normal = {family = "SauceCodeProNerdFont", style = "Regular"}
-bold = {family = "SauceCodeProNerdFont", style = "Bold"}
-italic = {family = "SauceCodeProNerdFont", style = "Italic"}
-bold_italic= {family = "SauceCodeProNerdFont", style = "BoldItalic"}
+normal = {family = "M+CodeLat60 NerdFont", style = "Regular"}
+bold = {family = "M+CodeLat60 NerdFont", style = "Bold"}
+italic = {family = "M+CodeLat60 NerdFont", style = "Italic"}
+bold_italic= {family = "M+CodeLat60 NerdFont", style = "BoldItalic"}
 
 [window]
 opacity=0.90
